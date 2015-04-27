@@ -54,7 +54,7 @@ my($USAGE) = "Usage: $0:
  ### Default 365 days normally but 1825 days for CA and CRL certs ###
  [--days number]
 
- ## Certificate key length.  Default 2048 bits ##
+ ## Certificate key length.  Default 4096 bits ##
  [--keylen bitlen|curvename]
 
  ## Hash Algorithm
@@ -107,7 +107,7 @@ my (@NewServer,@NewClient,@NewMail,@NewCoder,@AltNames,@NameConstraints,@SubCA);
 $OPTIONS{'workdir'} = File::Spec->canonpath("$FindBin::Bin/../etc/CA");
 $OPTIONS{'days'} = -1;
 $OPTIONS{'keylen'} = 0;
-$OPTIONS{'md'} = "sha1";
+$OPTIONS{'md'} = "sha512";
 $OPTIONS{'pk'} = "rsa";
 
 Getopt::Long::Configure("no_ignore_case", "no_auto_abbrev", "no_getopt_compat", "require_order");
@@ -205,7 +205,7 @@ sub gensslconf($$$$$$)
 
   print W <<EOF;
 [ req ]
-default_bits		= 2048
+default_bits		= 4096
 distinguished_name	= req_distinguished_name
 prompt			= no
 x509_extensions		= $extensions
@@ -798,7 +798,7 @@ if ($OPTIONS{'pk'} eq "rsa")
 {
   if (!$OPTIONS{'keylen'})
   {
-    $OPTIONS{'keylen'} = 2048;
+    $OPTIONS{'keylen'} = 4096;
   }
   die "Inappropriate keylen\n$USAGE" if ($OPTIONS{'keylen'} < 1024);
 }
@@ -806,7 +806,7 @@ elsif ($OPTIONS{'pk'} eq "dsa")
 {
   if (!$OPTIONS{'keylen'})
   {
-    $OPTIONS{'keylen'} = 2048;
+    $OPTIONS{'keylen'} = 4096;
   }
   die "Inappropriate keylen\n$USAGE" if ($OPTIONS{'keylen'} < 1024);
 }
@@ -1276,7 +1276,7 @@ is that your should protect your CA key well.
 =item B<--keylen I<bitlen>|I<curvename>>
 
 Override the default key length of a certificate.  The default key
-length is 2048 bits.  For ecc pk algorithms, the key length is used
+length is 4096 bits.  For ecc pk algorithms, the key length is used
 to communicate the curvename.
 
 `openssl ecparam -list_curves` shows you what curves are available.
