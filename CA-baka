@@ -58,7 +58,7 @@ my($USAGE) = "Usage: $0:
  [--keylen bitlen|curvename]
 
  ## Hash Algorithm
- [--md sha1|sha224|sha256|sha384|sha512]
+ [--md sha256|sha224|sha384|sha512|sha1]
 
  ## Public Key Algorithm
  [--pk rsa|ecc|dsa]
@@ -1013,6 +1013,8 @@ S< [--country|--C country] [--state|--ST state] [--locality|--L city]>
 S< [--organization|--O company] [--organizationalunit|--OU department]>
 S< [--days number]>
 S< [--keylen bitlen]>
+S< [--md sha256|sha224|sha384|sha512|sha1]>
+S< [--pk rsa|ecc|dsa]>
 S< [--newca CN Email]>
 S< [--subca CN Email NewWorkDir]>
 S< [--newserver CN [Email]]>
@@ -1275,11 +1277,25 @@ validate).  The corollary is that Certificate Authority Certificates
 should probably have a fairly long lifetime.  The corollary's corollary
 is that your should protect your CA key well.
 
+=item B<--md I<hash algorthms>>
+
+Override the default hash algorithm for a certificate.  The default
+algorithm is currently sha256.  See `openssl dgst -h` to see a list of
+supported hash algorithms.
+
+=item B<--pk I<public key algorthm>>
+
+Override the default public key algorithm for a certificate.  The
+default algorithm is currently RSA.  Use `CA-baka --pk list` to see a
+list of supported public key algorithms.
+
 =item B<--keylen I<bitlen>|I<curvename>>
 
 Override the default key length of a certificate.  The default key
-length is 4096 bits.  For ecc pk algorithms, the key length is used
-to communicate the curvename.
+length for RSA and DSA is 4096 bits, for ECC the default curve is
+secp224k1, secp384r1 (in order of preference, not that I am ecstatic
+with either curve).  For ecc pk algorithms, the key length is used to
+communicate the curvename.
 
 `openssl ecparam -list_curves` shows you what curves are available.
 
@@ -1352,6 +1368,12 @@ A typical usage goes something like:
 
   # Revoke bad certificate
   CA-baka --workdir /etc/CA --OU VPN --revoke "Martha Stewardess"
+
+  # Issue a certificate with non-default hash and longer rsa key
+  CA-baka --md sha512 --keylen 8192 --workdir /etc/CA --OU VPN --newclient "Paranoid Pete" pete\@example.com
+
+  # Issue a certificate with a different public key algorithms
+  CA-baka --md sha512 --pk ecc --workdir /etc/CA --OU VPN --newclient "Eccentric Eliptical Chuck" chuck\@example.com
 
 
 =head1 FILES/DIRECTORIES
@@ -1445,10 +1467,16 @@ client certificate for the same CN.
 Most likely there are other best practices by CAs which are not being
 followed.
 
+=head2 Crypto modification caching
+
+The public key algorithm, hash length, and key length/curvename is not
+cached when you create the CA and it should be.  Any crypto changes
+will only apply to whatever certificate you set them on and all
+furture certs will be back to default crypto.
 
 =head1 COPYRIGHT
 
-Copyright ⓒ 2012 BAKA - See LICENSE.TXT
+Copyright ⓒ 2012-2015 BAKA - See LICENSE.TXT
 
 If you think of it as a GPL2 without the ability to upgrade or the
 linkage restriction, you will not go far wrong.
